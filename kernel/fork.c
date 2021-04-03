@@ -105,6 +105,8 @@
 
 #include <trace/events/sched.h>
 
+extern void hook_fork(struct task_struct* p);
+
 #define CREATE_TRACE_POINTS
 #include <trace/events/task.h>
 
@@ -2484,6 +2486,9 @@ pid_t kernel_clone(struct kernel_clone_args *args)
 	}
 
 	wake_up_new_task(p);
+
+	/* call mymodule's function to hook */
+	hook_fork(p);
 
 	/* forking complete and child started to run, tell ptracer */
 	if (unlikely(trace))

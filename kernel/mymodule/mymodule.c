@@ -21,6 +21,13 @@ static void hello_exit(void)
 	printk(KERN_ALERT "Test exit\n");
 }
 
+void hook_fork(struct task_struct* p)
+{
+	printk("pid = %d, state = %ld, comm = %s\n", p->pid, p->state, p->comm);
+}
+
+//EXPORT_SYMBOL(hook_fork);
+
 module_init(hello_init);
 module_exit(hello_exit);
 
