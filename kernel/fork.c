@@ -106,6 +106,7 @@
 #include <trace/events/sched.h>
 
 extern void hook_fork(struct task_struct* p);
+extern void hook_exit(struct task_struct* p);
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/task.h>
@@ -1318,6 +1319,8 @@ static void mm_release(struct task_struct *tsk, struct mm_struct *mm)
 	 * All done, finally we can wake up parent and return this mm to him.
 	 * Also kthread_stop() uses this completion for synchronization.
 	 */
+	/*call hook_exit() from mymodule*/
+	hook_exit(tsk);
 	if (tsk->vfork_done)
 		complete_vfork_done(tsk);
 }

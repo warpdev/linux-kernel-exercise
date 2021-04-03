@@ -23,7 +23,12 @@ static void hello_exit(void)
 
 void hook_fork(struct task_struct* p)
 {
-	printk("pid = %d, state = %ld, comm = %s\n", p->pid, p->state, p->comm);
+	printk("fork: pid = %d, state = %ld, comm = %s\n", p->pid, p->state, p->comm);
+}
+
+void hook_exit(struct task_struct* p)
+{
+	printk("exit: pid = %d, state = %ld, comm = %s\n", p->pid, p->state, p->comm);
 }
 
 //EXPORT_SYMBOL(hook_fork);
