@@ -105,8 +105,11 @@
 
 #include <trace/events/sched.h>
 
-extern void hook_fork(struct task_struct* p);
-extern void hook_exit(struct task_struct* p);
+//extern void hook_fork(struct task_struct* p);
+//extern void hook_exit(struct task_struct* p);
+
+extern void (*hook_exit_p)(struct task_struct*);
+extern void (*hook_fork_p)(struct task_struct*);
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/task.h>
@@ -1320,7 +1323,16 @@ static void mm_release(struct task_struct *tsk, struct mm_struct *mm)
 	 * Also kthread_stop() uses this completion for synchronization.
 	 */
 	/*call hook_exit() from mymodule*/
-	hook_exit(tsk);
+	
+	//hook_exit(tsk);
+	struct module *mod;
+	mutex_lock(&module_mutex);
+	mod = find_module("mymodule");
+	if(mod)
+	{
+		hook_exit_p(tsk);
+	}
+	mutex_unlock(&module_mutex);
 	if (tsk->vfork_done)
 		complete_vfork_done(tsk);
 }
@@ -2491,8 +2503,16 @@ pid_t kernel_clone(struct kernel_clone_args *args)
 	wake_up_new_task(p);
 
 	/* call mymodule's function to hook */
-	hook_fork(p);
+	//hook_fork(p);
 
+	struct module *mod;
+	mutex_lock(&module_mutex);
+	mod = find_module("mymodule");
+	if(mod)
+	{
+		hook_fork_p(p);
+	}
+	mutex_unlock(&module_mutex);
 	/* forking complete and child started to run, tell ptracer */
 	if (unlikely(trace))
 		ptrace_event_pid(trace, pid);

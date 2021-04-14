@@ -3,12 +3,26 @@
 #include <linux/kernel.h>
 #include <linux/sched.h>
 
+void (*hook_fork_p)(struct task_struct*);
+void (*hook_exit_p)(struct task_struct*);
 
+void hook_fork(struct task_struct* p)
+{
+	printk("fork: pid = %d, state = %ld, comm = %s\n", p->pid, p->state, p->comm);
+}
+
+void hook_exit(struct task_struct* p)
+{
+	printk("exit: pid = %d, state = %ld, comm = %s\n", p->pid, p->state, p->comm);
+}
 
 static int hello_init(void)
 {
 	struct task_struct *p;
 	p=get_current();
+	
+	hook_fork_p = hook_fork;
+	hook_exit_p = hook_exit;
 
 	printk("Kernel Message] : Current Process\n");
 	printk("pid = %d, state = %ld, comm = %s\n", p->pid, p->state, p->comm);
@@ -21,15 +35,6 @@ static void hello_exit(void)
 	printk(KERN_ALERT "Test exit\n");
 }
 
-void hook_fork(struct task_struct* p)
-{
-	printk("fork: pid = %d, state = %ld, comm = %s\n", p->pid, p->state, p->comm);
-}
-
-void hook_exit(struct task_struct* p)
-{
-	printk("exit: pid = %d, state = %ld, comm = %s\n", p->pid, p->state, p->comm);
-}
 
 //EXPORT_SYMBOL(hook_fork);
 
